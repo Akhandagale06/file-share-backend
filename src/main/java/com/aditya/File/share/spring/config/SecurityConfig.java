@@ -30,7 +30,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/webhooks/**", "/files/public/**", "/files/download/**").permitAll()
+                        .requestMatchers("/webhooks/**", "/files/public/**", "/files/download/**", "/files/download-local/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

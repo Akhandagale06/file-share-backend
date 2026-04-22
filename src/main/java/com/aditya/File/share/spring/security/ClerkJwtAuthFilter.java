@@ -36,10 +36,46 @@ public class ClerkJwtAuthFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        // Allow public routes
-        if (request.getRequestURI().contains("/webhooks") ||
-                request.getRequestURI().contains("/public") ||
-                request.getRequestURI().contains("/download")) {
+        String uri = request.getRequestURI();
+        // Allow public routes - don't require authentication
+        boolean isPublicRoute = uri.contains("/webhooks") ||
+                uri.contains("/public") ||
+                uri.contains("/download");
+
+        if (isPublicRoute) {
+            // Still try to set auth if token is present, but don't block if missing/invalid
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                try {
+                    String token = authHeader.substring(7);
+                    String[] chunks = token.split("\\.");
+                    if (chunks.length >= 3) {
+                        String headerJson = new String(Base64.getUrlDecoder().decode(chunks[0]));
+                        ObjectMapper mapper = new ObjectMapper();
+                        JsonNode headerNode = mapper.readTree(headerJson);
+                        if (headerNode.has("kid")) {
+                            String kid = headerNode.get("kid").asText();
+                            PublicKey publicKey = jwksProvider.getPublicKey(kid);
+                            Claims claims = Jwts.parser()
+                                    .setSigningKey(publicKey)
+                                    .setAllowedClockSkewSeconds(60)
+                                    .requireIssuer(clerkIssuer)
+                                    .build()
+                                    .parseClaimsJws(token)
+                                    .getBody();
+                            String clerkId = claims.getSubject();
+                            UsernamePasswordAuthenticationToken authentication =
+                                    new UsernamePasswordAuthenticationToken(
+                                            clerkId, null,
+                                            Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+                                    );
+                            SecurityContextHolder.getContext().setAuthentication(authentication);
+                        }
+                    }
+                } catch (Exception ignored) {
+                    // Invalid token on public route - just proceed without auth
+                }
+            }
             filterChain.doFilter(request, response);
             return;
         }

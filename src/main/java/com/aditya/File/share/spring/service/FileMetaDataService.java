@@ -24,7 +24,7 @@ public class FileMetaDataService {
     private final ProfileService profileService;
     private final UserCreditsService userCreditsService;
     private final FileMetaDataRepo fileMetaDataRepo;
-    private final CloudinaryService cloudinaryService;
+    private final SupabaseStorageService supabaseStorageService;
 
 
     public List<FileMetaDataDTO> uploadFiles(MultipartFile files[]) throws IOException {
@@ -36,7 +36,7 @@ public class FileMetaDataService {
 
      }
         for(MultipartFile file : files){
-         Map uploadResult = cloudinaryService.uploadFile(file);
+         Map uploadResult = supabaseStorageService.uploadFile(file);
          String fileUrl = uploadResult.get("secure_url").toString();
          String publicId = uploadResult.get("public_id").toString();
 
@@ -104,7 +104,7 @@ public class FileMetaDataService {
                 throw new RuntimeException("File does not belong to existing user");
             }
             if (file.getPublicId() != null) {
-                cloudinaryService.deleteFile(file.getPublicId());
+                supabaseStorageService.deleteFile(file.getPublicId());
             } else {
                 try {
                     java.nio.file.Path filePath = java.nio.file.Paths.get(file.getFileLocation());

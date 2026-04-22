@@ -100,11 +100,11 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Cloudinary -->
+		<!-- OkHttp for Supabase -->
 		<dependency>
-			<groupId>com.cloudinary</groupId>
-			<artifactId>cloudinary-http44</artifactId>
-			<version>1.38.0</version>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<version>4.12.0</version>
 		</dependency>
 
 	</dependencies>
