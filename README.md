@@ -1,6 +1,6 @@
 # 🛡️ Backend (Spring Boot)
 
-The backend service for **Pro-Share**, a secure file-sharing platform. It handles authentication, file operations, payment processing, and database management.
+The backend service for **File-Share**, a secure file-sharing platform. It handles authentication, file operations, payment processing, and database management.
 
 ---
 
